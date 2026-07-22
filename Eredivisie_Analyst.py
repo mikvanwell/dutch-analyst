@@ -6,9 +6,9 @@ st.set_page_config(
 )
 
 st.title("Eredivisie Analyst")
-st.write("**Welcome to *the* app with everything you need to analyse Eredivisie football.**")
+st.write("**Welcome to *the* app with everything you need to analyse Eredivisie football and optimise your Fantasy Eredivisie (Voetbal) strategy.**")
 
-st.write("Wondering how the Eredivisie would look based on expected goals?")
+st.write("Wondering how your team is projected to perform in the upcoming season?")
 st.page_link("pages/Expected_Standings.py", label="➡️ Go to Expected Standings 📊")
 
 st.write("Do you need help with your Fantasy Eredivisie squad?")
