@@ -5,10 +5,10 @@ st.set_page_config(
     page_icon="🏠"
 )
 
-st.title("Eredivisie Analyst")
-st.write("**Welcome to *the* app with everything you need to analyse Eredivisie football.**")
+st.title("Dutch Analyst")
+st.write("**Welcome to *the* app with everything you need to analyse Dutch football.**")
 
-st.write("Wondering how the Eredivisie would look based on expected goals?")
+st.write("Wondering which Eredivisie teams have the best underlying data?")
 st.page_link("pages/Expected_Standings.py", label="➡️ Go to Expected Standings 📊")
 
 st.write("Do you need help with your Fantasy Eredivisie squad?")
