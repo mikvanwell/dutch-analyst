@@ -30,13 +30,13 @@ def load_data():
 def get_color_from_score(score):
     if pd.isna(score):
         return 'background-color: white'
-    elif score < 0.2:
+    elif score < 0.15:
         return 'background-color: #006400; color: white'  # Dark green
     elif score < 0.4:
         return 'background-color: #01fc79'  # Light green
     elif score < 0.6:
         return 'background-color: #e7e7e7'  # Grey
-    elif score < 0.8:
+    elif score < 0.85:
         return 'background-color: #ff1751; color: white'  # Light red
     else:
         return 'background-color: #80082e; color: white'  # Dark red
@@ -78,7 +78,7 @@ def main():
         return
 
     # Sort by team
-    fdr_schedule = fdr_schedule.sort_values('Team').reset_index(drop=True)
+    fdr_schedule = fdr_schedule.sort_values('team_id').reset_index(drop=True)
 
     # Position group selection
     position_group = st.radio(
