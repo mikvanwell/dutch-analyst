@@ -5,7 +5,7 @@ st.set_page_config(
     page_icon="🏠"
 )
 
-st.title("Dutch Analyst")
+st.title("Mik van Well Analysis")
 st.write("**Welcome to the site with everything you need to analyse Dutch football and optimize your *Fantasy Voetbal* squad.**")
 
 st.write("Wondering which Eredivisie teams have the best underlying data?")
