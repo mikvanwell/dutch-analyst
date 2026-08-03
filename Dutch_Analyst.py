@@ -6,13 +6,13 @@ st.set_page_config(
 )
 
 st.title("Dutch Analyst")
-st.write("**Welcome to *the* app with everything you need to analyse Dutch football.**")
+st.write("**Welcome to the site with everything you need to analyse Dutch football and optimize your *Fantasy Voetbal* squad.**")
 
 st.write("Wondering which Eredivisie teams have the best underlying data?")
-st.page_link("pages/Expected_Standings.py", label="➡️ Go to Expected Standings 📊")
+st.page_link("pages/Team_Data.py", label="➡️ Go to Team Data 📊")
 
 st.write("Do you need help with your Fantasy Eredivisie squad?")
-st.page_link("pages/Fantasy_Eredivisie.py", label="➡️ Go to our Fantasy Hub 🔮")
+st.page_link("pages/FDR_Schedule.py", label="➡️ Go to our Fantasy Hub 🔮")
 
-st.write("**(Coming soon)** Want to know which players are performing well?")
+st.write("Want to know which players are expected to score most points?")
 st.page_link("pages/Player_Analysis.py", label="➡️ Go to Player Analysis ⚽️")

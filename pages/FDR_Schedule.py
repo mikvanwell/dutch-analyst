@@ -3,19 +3,19 @@ import pandas as pd
 import numpy as np
 
 st.set_page_config(
-    page_title="Fantasy Eredivisie",
+    page_title="FDR Schedule",
     page_icon="🔮",
     layout="wide"
 )
 
-st.title("Fantasy Eredivisie")
-st.subheader("FDR Schedule")
+st.title("FDR Schedule")
 st.markdown(
-    "The Fixture Difficulty Rating schedule below can help you plan your transfers and team selection strategy. "
-    "FDR is determined based on recent relative offensive and defensive performance. More information about the calculation can be found [here](https://open.substack.com/pub/mikvanwell/p/calculating-fixture-difficulty?r=4l6fci&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true)."
+    "The Fixture Difficulty Rating schedule below can help you plan your transfers and team selection strategy."
+    "FDR is determined based on recent relative offensive and defensive performance."
+    "More information about the calculation can be found [here](https://open.substack.com/pub/mikvanwell/p/calculating-fixture-difficulty?r=4l6fci&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true)."
 )
 st.markdown(
-    "You can choose which position group you want to optimise the schedule for. "
+    "You can choose which position group you want to optimise the schedule for."
     "If you want to see an 'overall' schedule, select the DEF schedule, as it covers both offensive and defensive difficulty."
 )
 
@@ -25,6 +25,15 @@ def load_data():
     fdr_schedule = pd.read_csv('fdr_schedule.csv')
     fdr_small = pd.read_csv('fdr_small.csv')
     return fdr_schedule, fdr_small
+
+# Precompute fixture -> score dicts once, instead of filtering fdr_small per cell
+@st.cache_data
+def build_score_maps(fdr_small):
+    return {
+        'KEE': fdr_small.set_index('fixture')['fdr_kee'].to_dict(),
+        'DEF': fdr_small.set_index('fixture')['fdr_def'].to_dict(),
+        'MID/ATT': fdr_small.set_index('fixture')['fdr_mid_att'].to_dict(),
+    }
 
 # Convert numeric score to color
 def get_color_from_score(score):
@@ -41,27 +50,12 @@ def get_color_from_score(score):
     else:
         return 'background-color: #80082e; color: white'  # Dark red
 
-# Lookup the FDR score for a fixture
-def get_fdr_score(fixture, fdr_small, position_group):
-    if pd.isna(fixture):
-        return np.nan
-    column_map = {
-        'KEE': 'fdr_kee',
-        'DEF': 'fdr_def',
-        'MID/ATT': 'fdr_mid_att'
-    }
-    col = column_map[position_group]
-    row = fdr_small.loc[fdr_small['fixture'] == fixture]
-    if not row.empty:
-        return row.iloc[0][col]
-    return np.nan
-
-# Apply colors to the dataframe
-def style_dataframe(df, fdr_small, position_group):
+# Apply colors to the dataframe using a precomputed dict (O(1) lookups, no per-cell filtering)
+def style_dataframe(df, score_map):
     def apply_color(val, col_name):
         if col_name == 'Team':
             return 'background-color: white'
-        score = get_fdr_score(val, fdr_small, position_group)
+        score = score_map.get(val, np.nan) if pd.notna(val) else np.nan
         return get_color_from_score(score)
 
     styled = df.style.apply(
@@ -79,6 +73,7 @@ def main():
 
     # Sort by team
     fdr_schedule = fdr_schedule.sort_values('team_id').reset_index(drop=True)
+    fdr_schedule = fdr_schedule.rename(columns={'team_id': 'Team'})
 
     # Position group selection
     position_group = st.radio(
@@ -88,14 +83,17 @@ def main():
         horizontal=True
     )
 
-    # Style dataframe
-    styled_df = style_dataframe(fdr_schedule, fdr_small, position_group)
+    # Build lookup dicts once (cached across reruns since fdr_small doesn't change)
+    score_maps = build_score_maps(fdr_small)
+
+    # Style dataframe using the fast dict lookup for the selected position group
+    styled_df = style_dataframe(fdr_schedule, score_maps[position_group])
 
     # Display the table with sticky Team column
     st.markdown("""
     <style>
     .stDataFrame {
-        width: 100%;
+        width: auto;
     }
 
     /* Make the first visible column sticky (Team) */
@@ -126,10 +124,15 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
+    # Calculate height so all rows fit without vertical scrolling
+    row_height = 35
+    header_height = 38
+    table_height = header_height + (len(fdr_schedule) * row_height)
+
     st.dataframe(
         styled_df,
-        width='stretch',
-        height=600,
+        width='content',
+        height=table_height,
         hide_index=True
     )
 
