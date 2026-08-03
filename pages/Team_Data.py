@@ -10,12 +10,9 @@ st.set_page_config(
 
 st.title("Team Data")
 st.markdown(
-    '<div style="font-size: 1.5em;">'
     "Underlying data (non-penalty and adjusted expected goals) for every Eredivisie team, "
     "based on their 25/26 performance. "
     "The data will be updated throughout the 26/27 season and those changes will also be reflected in the FDR Schedule."
-    "</div>",
-    unsafe_allow_html=True
 )
 
 # Load data
@@ -107,14 +104,14 @@ def style_dataframe(df):
 
     return styled
 
-# CSS for the rendered table: doubled font size (14px baseline -> 28px), clean borders/padding
+# CSS for the rendered table: regular font size, clean borders/padding
 TABLE_CSS = """
 <style>
 .team-data-table table {
     border-collapse: separate;
     border-spacing: 0;
     width: 100%;
-    font-size: 21px;
+    font-size: 14px;
 }
 .team-data-table th, .team-data-table td {
     border: 1px solid #ddd;
