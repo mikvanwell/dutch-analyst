@@ -12,7 +12,7 @@ st.title("Team Data")
 st.markdown(
     '<div style="font-size: 1.5em;">'
     "Underlying data (non-penalty and adjusted expected goals) for every Eredivisie team, "
-    "based on their 25/26 performance."
+    "based on their 25/26 performance. "
     "The data will be updated throughout the 26/27 season and those changes will also be reflected in the FDR Schedule."
     "</div>",
     unsafe_allow_html=True

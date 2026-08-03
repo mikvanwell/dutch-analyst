@@ -10,7 +10,7 @@ st.set_page_config(
 
 st.title("Player Analysis")
 st.markdown(
-    "Expected points (xPTS) data for every Eredivisie player, based on recent underlying performance."
+    "Expected points (xPTS) data for every Eredivisie player, based on 25/26 underlying performance."
 )
 
 # Load data
