@@ -17,7 +17,7 @@ load_css()
 st.title("Player Analysis")
 
 st.markdown(
-    "The Player Analysis helps you identify the best options for your Fantasy Voetbal "
+    "This page helps you identify the best options for your Fantasy Voetbal "
     "squad based on expected points (xPTS). Instead of relying solely on historical "
     "points, player reputation or current ownership, the model estimates how many "
     "Fantasy points each player is expected to score."
@@ -49,7 +49,6 @@ def load_data():
 
 def prepare_data(df):
 
-    # Columns that should be displayed
     columns = [
         "name",
         "team",
@@ -80,12 +79,6 @@ def prepare_data(df):
         "€": "Price"
     })
 
-    # Sort by total expected points
-    df = df.sort_values(
-        "Total xPTS",
-        ascending=False
-    ).reset_index(drop=True)
-
     return df
 
 
@@ -95,34 +88,21 @@ def prepare_data(df):
 
 def style_dataframe(df):
 
-    # Columns containing numbers
-    number_columns = [
-        "Price",
-        "xMins",
-        "xPTS/M",
-        "Total xPTS",
-        "xPTS/€"
-    ]
-
     gameweek_columns = [
         col for col in df.columns
         if col.startswith("GW")
     ]
 
-    number_columns += gameweek_columns
-
-    # Alternating row colours
     def row_style(row):
 
         if row.name % 2 == 0:
+
             return [
                 "background-color: #ffffff;"
-                "font-family: 'DM Sans', sans-serif;"
             ] * len(row)
 
         return [
             "background-color: #f5f5f5;"
-            "font-family: 'DM Sans', sans-serif;"
         ] * len(row)
 
     styled = df.style.apply(
@@ -184,10 +164,9 @@ TABLE_CSS = """
     padding: 8px 12px;
     text-align: center;
     white-space: nowrap;
-    font-family: 'DM Sans', sans-serif;
 }
 
-/* Left-align player and team names */
+/* Player and team names */
 .player-analysis-table td:nth-child(1),
 .player-analysis-table td:nth-child(2) {
     text-align: left;
@@ -209,7 +188,7 @@ TABLE_CSS = """
     z-index: 4;
 }
 
-/* Keep sticky cells white/grey depending on row */
+/* Keep sticky cells consistent with alternating rows */
 .player-analysis-table tbody tr:nth-child(odd) td:first-child,
 .player-analysis-table tbody tr:nth-child(odd) td:nth-child(2) {
     background-color: #ffffff;
@@ -220,7 +199,7 @@ TABLE_CSS = """
     background-color: #f5f5f5;
 }
 
-/* Slightly stronger border after player information */
+/* Separate player information from gameweek data */
 .player-analysis-table th:nth-child(8),
 .player-analysis-table td:nth-child(8) {
     border-right: 2px solid #bdbdbd;
@@ -264,13 +243,15 @@ def main():
 
 
     # -----------------------------------------------------
-    # Filters
+    # Filters & sorting
     # -----------------------------------------------------
 
-    st.markdown("### Filter Players")
+    st.markdown("### Filter & Sort Players")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns([1, 1, 1.5, 1])
 
+
+    # Position filter
     with col1:
 
         positions = ["All"] + sorted(
@@ -282,9 +263,11 @@ def main():
 
         selected_position = st.selectbox(
             "Position",
-            positions
+            options=positions
         )
 
+
+    # Team filter
     with col2:
 
         teams = ["All"] + sorted(
@@ -296,21 +279,69 @@ def main():
 
         selected_team = st.selectbox(
             "Team",
-            teams
+            options=teams
         )
 
+
+    # Price filter
     with col3:
 
-        minimum_xpts = st.number_input(
-            "Minimum Total xPTS",
-            min_value=0.0,
-            value=0.0,
-            step=5.0
+        min_price = float(
+            player_data["Price"].min()
+        )
+
+        max_price = float(
+            player_data["Price"].max()
+        )
+
+        selected_price = st.slider(
+            "Price (€)",
+            min_value=min_price,
+            max_value=max_price,
+            value=(min_price, max_price),
+            step=0.1
         )
 
 
+    # Sort column
+    with col4:
+
+        sort_options = [
+            "Total xPTS",
+            "xPTS/M",
+            "xPTS/€",
+            "Price",
+            "xMins",
+            "Player",
+            "Team",
+            "Pos"
+        ]
+
+        selected_sort = st.selectbox(
+            "Sort by",
+            options=sort_options
+        )
+
+
+    # -----------------------------------------------------
+    # Sort direction
+    # -----------------------------------------------------
+
+    sort_ascending = st.radio(
+        "Sort direction",
+        options=["Highest → Lowest", "Lowest → Highest"],
+        horizontal=True
+    )
+
+    ascending = sort_ascending == "Lowest → Highest"
+
+
+    # -----------------------------------------------------
     # Apply filters
+    # -----------------------------------------------------
+
     filtered_data = player_data.copy()
+
 
     if selected_position != "All":
 
@@ -318,15 +349,37 @@ def main():
             filtered_data["Pos"] == selected_position
         ]
 
+
     if selected_team != "All":
 
         filtered_data = filtered_data[
             filtered_data["Team"] == selected_team
         ]
 
+
     filtered_data = filtered_data[
-        filtered_data["Total xPTS"] >= minimum_xpts
+        (filtered_data["Price"] >= selected_price[0])
+        & (filtered_data["Price"] <= selected_price[1])
     ]
+
+
+    # -----------------------------------------------------
+    # Sort data
+    # -----------------------------------------------------
+
+    filtered_data = filtered_data.sort_values(
+        by=selected_sort,
+        ascending=ascending
+    ).reset_index(drop=True)
+
+
+    # -----------------------------------------------------
+    # Display number of players
+    # -----------------------------------------------------
+
+    st.caption(
+        f"Showing {len(filtered_data)} of {len(player_data)} players"
+    )
 
 
     # -----------------------------------------------------

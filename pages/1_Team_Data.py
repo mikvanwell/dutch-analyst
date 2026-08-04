@@ -20,20 +20,30 @@ st.title("Team Data")
 st.markdown(
     "Underlying data (non-penalty and adjusted expected goals) for every Eredivisie team, "
     "based on their 25/26 performance. "
-    "The data will be updated throughout the 26/27 season and those changes will also be reflected in the FDR Schedule."
+    "The data will be updated throughout the 26/27 season based on "
+    "[this calculation](https://open.substack.com/pub/mikvanwell/p/calculating-fixture-difficulty?r=4l6fci&utm_campaign=post&utm_medium=web), "
+    "and those changes will also be reflected in the FDR Schedule."
 )
 
 
+# ---------------------------------------------------------
 # Load data
+# ---------------------------------------------------------
+
 @st.cache_data
 def load_data():
+
     df = pd.read_csv("fdr_data.csv")
+
     return df
 
 
+# ---------------------------------------------------------
+# Prepare data
+# ---------------------------------------------------------
+
 def prepare_data(df):
 
-    # Keep only relevant columns
     df = df[
         [
             "team_id",
@@ -64,7 +74,11 @@ def prepare_data(df):
     )
 
     # Sort by rank
-    df = df.sort_values("xRank").reset_index(drop=True)
+    df = (
+        df
+        .sort_values("xRank")
+        .reset_index(drop=True)
+    )
 
     # Final column order
     df = df[
@@ -84,7 +98,10 @@ def prepare_data(df):
     return df
 
 
-# Convert score to heatmap color
+# ---------------------------------------------------------
+# Heatmap colours
+# ---------------------------------------------------------
+
 def get_color_from_score(score):
 
     if pd.isna(score):
@@ -106,7 +123,6 @@ def get_color_from_score(score):
         return "background-color: #80082e; color: white"
 
 
-# Calculate heatmap score based on standard deviations from mean
 def get_heatmap_score(
     value,
     mean_val,
@@ -128,6 +144,10 @@ def get_heatmap_score(
     return 0.5 + z / 4
 
 
+# ---------------------------------------------------------
+# Style dataframe
+# ---------------------------------------------------------
+
 def style_dataframe(df):
 
     adjxg_mean = df["adjxG"].mean()
@@ -136,9 +156,10 @@ def style_dataframe(df):
     adjxga_mean = df["adjxGA"].mean()
     adjxga_std = df["adjxGA"].std()
 
-    def apply_color(val, col_name):
 
-        if col_name == "adjxG":
+    def apply_heatmap(val, column):
+
+        if column == "adjxG":
 
             score = get_heatmap_score(
                 val,
@@ -149,7 +170,8 @@ def style_dataframe(df):
 
             return get_color_from_score(score)
 
-        elif col_name == "adjxGA":
+
+        elif column == "adjxGA":
 
             score = get_heatmap_score(
                 val,
@@ -160,17 +182,60 @@ def style_dataframe(df):
 
             return get_color_from_score(score)
 
+
         return ""
 
+
+    # -----------------------------------------------------
+    # Alternating row styling
+    # -----------------------------------------------------
+
+    def row_style(row):
+
+        if row.name % 2 == 0:
+
+            base_style = (
+                "background-color: #ffffff;"
+            )
+
+        else:
+
+            base_style = (
+                "background-color: #f5f5f5;"
+            )
+
+        return [
+            base_style
+            for _ in row
+        ]
+
+
     styled = df.style.apply(
-        lambda x: [
-            apply_color(val, x.name)
-            for val in x
+        row_style,
+        axis=1
+    )
+
+
+    # -----------------------------------------------------
+    # Apply heatmap on top of row styling
+    # -----------------------------------------------------
+
+    styled = styled.apply(
+        lambda column: [
+            apply_heatmap(
+                value,
+                column.name
+            )
+            for value in column
         ],
         axis=0
     )
 
+
+    # -----------------------------------------------------
     # Number formatting
+    # -----------------------------------------------------
+
     styled = styled.format({
         "xRank": "{:.0f}",
         "adjxG": "{:.2f}",
@@ -182,10 +247,12 @@ def style_dataframe(df):
         "xGA_pershot": "{:.3f}",
     })
 
+
     # Hide index
     styled = styled.hide(axis="index")
 
-    # Display column names
+
+    # Rename headers
     styled = styled.relabel_index(
         [
             "Team",
@@ -201,70 +268,119 @@ def style_dataframe(df):
         axis="columns"
     )
 
+
     return styled
 
 
-# Page-specific table CSS
+# ---------------------------------------------------------
+# Table CSS
+# ---------------------------------------------------------
+
 TABLE_CSS = """
 <style>
 
-.team-data-table table {
-    border-collapse: separate;
-    border-spacing: 0;
+.team-data-table {
     width: 100%;
-    font-size: 14px;
+    overflow-x: auto;
 }
 
-.team-data-table th,
-.team-data-table td {
-    border: 1px solid #ddd;
-    padding: 10px 14px;
-    text-align: center;
+.team-data-table table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
 }
 
 .team-data-table th {
     background-color: #f2f2f2;
+    color: #222;
     font-weight: 700;
+    border: 1px solid #d9d9d9;
+    padding: 9px 12px;
+    text-align: center;
+    white-space: nowrap;
 }
 
+.team-data-table td {
+    border: 1px solid #e0e0e0;
+    padding: 8px 12px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Left-align team names */
+.team-data-table td:first-child {
+    text-align: left;
+}
+
+/* Sticky Team column */
 .team-data-table th:first-child,
 .team-data-table td:first-child {
     position: sticky;
     left: 0;
-    background-color: white;
-    border-right: 2px solid #ddd;
+    z-index: 5;
+}
+
+/* Keep sticky Team cell consistent with alternating rows */
+.team-data-table tbody tr:nth-child(odd) td:first-child {
+    background-color: #ffffff;
+}
+
+.team-data-table tbody tr:nth-child(even) td:first-child {
+    background-color: #f5f5f5;
+}
+
+/* Slightly stronger separation after Team */
+.team-data-table th:first-child,
+.team-data-table td:first-child {
+    border-right: 2px solid #bdbdbd;
 }
 
 </style>
 """
 
 
+# ---------------------------------------------------------
+# Main
+# ---------------------------------------------------------
+
 def main():
 
+    # Load data
     try:
+
         fdr_data = load_data()
 
     except FileNotFoundError:
 
         st.error(
-            "Please make sure 'fdr_data.csv' is in the same directory."
+            "Please make sure 'fdr_data.csv' "
+            "is in the same directory as the Streamlit app."
         )
 
         return
 
+
+    # Prepare data
     team_data = prepare_data(fdr_data)
 
+
+    # Style dataframe
     styled_data = style_dataframe(team_data)
 
+
+    # Add table CSS
     st.markdown(
         TABLE_CSS,
         unsafe_allow_html=True
     )
 
+
+    # Display table
     st.markdown(
-        f'<div class="team-data-table">'
-        f'{styled_data.to_html()}'
-        f'</div>',
+        '<div class="team-data-table">'
+        + styled_data.to_html()
+        + '</div>',
         unsafe_allow_html=True
     )
 
