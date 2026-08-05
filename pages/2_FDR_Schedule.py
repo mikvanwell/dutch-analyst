@@ -77,43 +77,43 @@ def build_score_maps(fdr_small):
 # ---------------------------------------------------------
 # FDR colour scheme
 # ---------------------------------------------------------
-# NOTE: the FDR bands use fixed accent colours (green -> grey -> red)
-# regardless of light/dark theme, since these are meaningful data colours,
-# not chrome. Each band explicitly sets a text colour with guaranteed
-# contrast against its own background, so it stays legible in either theme.
 
 def get_color_from_score(score):
 
     if pd.isna(score):
-        # Let the alternating row colour show through instead of forcing
-        # a hardcoded light background.
+
         return "background-color: transparent;"
 
     elif score < 0.15:
+
         return (
             "background-color: #006400;"
             "color: #ffffff;"
         )
 
     elif score < 0.4:
+
         return (
             "background-color: #01fc79;"
             "color: #063d1f;"
         )
 
     elif score < 0.6:
+
         return (
             "background-color: #e7e7e7;"
             "color: #1a1a1a;"
         )
 
     elif score < 0.85:
+
         return (
             "background-color: #ff1751;"
             "color: #ffffff;"
         )
 
     else:
+
         return (
             "background-color: #80082e;"
             "color: #ffffff;"
@@ -126,7 +126,6 @@ def get_color_from_score(score):
 
 def style_dataframe(df, score_map):
 
-    # Columns containing fixtures
     fixture_columns = [
         column
         for column in df.columns
@@ -137,9 +136,6 @@ def style_dataframe(df, score_map):
     # -----------------------------------------------------
     # Alternating row styling
     # -----------------------------------------------------
-    # Uses Streamlit's theme CSS variables so the stripe colours (and the
-    # text colour) automatically match whichever theme (light/dark) the
-    # user has selected, instead of being hardcoded to white/black.
 
     def row_style(row):
 
@@ -169,6 +165,7 @@ def style_dataframe(df, score_map):
     def apply_fdr_color(value, column):
 
         if column == "Team":
+
             return ""
 
         score = (
@@ -202,19 +199,24 @@ def style_dataframe(df, score_map):
 # ---------------------------------------------------------
 # Table CSS
 # ---------------------------------------------------------
-# Backgrounds, text and borders below use Streamlit's theme CSS variables
-# (--background-color, --secondary-background-color, --text-color) rather
-# than hardcoded hex values, so the table follows the app's light/dark
-# theme automatically. Borders use a translucent grey (rgba) so they read
-# correctly against either a light or dark background.
 
 TABLE_CSS = """
 <style>
 
+/* =========================================================
+   TABLE CONTAINER
+   ========================================================= */
+
 .fdr-table {
     width: 100%;
     overflow-x: auto;
+    position: relative;
 }
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
 
 .fdr-table table {
     border-collapse: separate;
@@ -230,13 +232,29 @@ TABLE_CSS = """
    ========================================================= */
 
 .fdr-table th {
+
     background-color: #f0f2f6;
     color: #262730;
+
     font-weight: 700;
-    border: 1px solid rgba(128, 128, 128, 0.35);
+
+    border-top: 1px solid rgba(128, 128, 128, 0.35);
+    border-bottom: 1px solid rgba(128, 128, 128, 0.35);
+    border-right: 1px solid rgba(128, 128, 128, 0.35);
+
     padding: 9px 10px;
+
     text-align: center;
     white-space: nowrap;
+
+    position: relative;
+    z-index: 1;
+}
+
+.fdr-table th:first-child {
+
+    border-left: 1px solid rgba(128, 128, 128, 0.35);
+
 }
 
 
@@ -245,67 +263,84 @@ TABLE_CSS = """
    ========================================================= */
 
 .fdr-table td {
-    border: 1px solid rgba(128, 128, 128, 0.25);
+
+    border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+    border-right: 1px solid rgba(128, 128, 128, 0.25);
+
     padding: 8px 10px;
+
     text-align: center;
     white-space: nowrap;
+
+    position: relative;
+    z-index: 1;
 }
 
 .fdr-table td:first-child {
+
+    border-left: 1px solid rgba(128, 128, 128, 0.25);
     text-align: left;
+
 }
 
 
 /* =========================================================
-   STICKY TEAM COLUMN — LIGHT MODE
+   STICKY TEAM COLUMN
    ========================================================= */
 
 .fdr-table th:first-child,
 .fdr-table td:first-child {
+
     position: sticky;
     left: 0;
-    z-index: 100;
-    min-width: 120px;
 
-    /* FIXED OPAQUE BACKGROUND */
-    background-color: #ffffff !important;
+    z-index: 100;
+
+    min-width: 120px;
 
     border-right: 2px solid rgba(128, 128, 128, 0.45);
 
-    box-shadow: 3px 0 6px -3px rgba(0, 0, 0, 0.45);
-}
+    box-shadow:
+        3px 0 6px -3px rgba(0, 0, 0, 0.45);
 
-
-/* Alternating Team rows */
-
-.fdr-table tbody tr:nth-child(odd) td:first-child {
-    background-color: #ffffff !important;
-}
-
-.fdr-table tbody tr:nth-child(even) td:first-child {
-    background-color: #f5f5f5 !important;
 }
 
 
 /* =========================================================
-   DARK MODE
+   LIGHT MODE — STICKY TEAM COLUMN
    ========================================================= */
 
-[data-theme="dark"] .fdr-table th {
-    background-color: #262730 !important;
-    color: #fafafa !important;
+.fdr-table tbody tr:nth-child(odd) td:first-child {
+
+    background-color: #ffffff !important;
+    color: #262730 !important;
+
 }
 
-[data-theme="dark"] .fdr-table th:first-child {
-    background-color: #262730 !important;
+.fdr-table tbody tr:nth-child(even) td:first-child {
+
+    background-color: #f5f5f5 !important;
+    color: #262730 !important;
+
 }
+
+
+/* =========================================================
+   DARK MODE — STICKY TEAM COLUMN
+   ========================================================= */
 
 [data-theme="dark"] .fdr-table tbody tr:nth-child(odd) td:first-child {
+
     background-color: #0e1117 !important;
+    color: #fafafa !important;
+
 }
 
 [data-theme="dark"] .fdr-table tbody tr:nth-child(even) td:first-child {
+
     background-color: #262730 !important;
+    color: #fafafa !important;
+
 }
 
 
@@ -314,22 +349,40 @@ TABLE_CSS = """
    ========================================================= */
 
 .fdr-table thead th:first-child {
+
     position: sticky;
     left: 0;
+
     z-index: 200;
 
     background-color: #f0f2f6 !important;
+    color: #262730 !important;
+
 }
 
 
 /* =========================================================
-   OTHER CELLS STAY BELOW STICKY COLUMN
+   DARK MODE — STICKY HEADER
+   ========================================================= */
+
+[data-theme="dark"] .fdr-table thead th:first-child {
+
+    background-color: #262730 !important;
+    color: #fafafa !important;
+
+}
+
+
+/* =========================================================
+   OTHER CELLS
    ========================================================= */
 
 .fdr-table th:not(:first-child),
 .fdr-table td:not(:first-child) {
+
     position: relative;
     z-index: 1;
+
 }
 
 
@@ -338,7 +391,9 @@ TABLE_CSS = """
    ========================================================= */
 
 .fdr-table td:not(:first-child) {
+
     min-width: 42px;
+
 }
 
 </style>
@@ -348,9 +403,6 @@ TABLE_CSS = """
 # ---------------------------------------------------------
 # FDR Legend
 # ---------------------------------------------------------
-# The legend swatches also use fixed accent colours (matching the table),
-# with a text colour chosen per swatch for guaranteed contrast in both
-# light and dark themes.
 
 def display_legend():
 
@@ -494,7 +546,7 @@ def main():
     position_group = st.radio(
         "Select Position Group:",
         options=["KEE", "DEF", "MID/ATT"],
-        index=1,  # DEF selected by default
+        index=1,
         horizontal=True
     )
 
