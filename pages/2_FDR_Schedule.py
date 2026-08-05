@@ -211,20 +211,10 @@ def style_dataframe(df, score_map):
 TABLE_CSS = """
 <style>
 
-/* =========================================================
-   TABLE CONTAINER
-   ========================================================= */
-
 .fdr-table {
     width: 100%;
     overflow-x: auto;
-    position: relative;
 }
-
-
-/* =========================================================
-   TABLE
-   ========================================================= */
 
 .fdr-table table {
     border-collapse: separate;
@@ -240,26 +230,13 @@ TABLE_CSS = """
    ========================================================= */
 
 .fdr-table th {
-    background-color: var(--secondary-background-color);
-    color: var(--text-color);
-
+    background-color: #f0f2f6;
+    color: #262730;
     font-weight: 700;
-
-    border-top: 1px solid rgba(128, 128, 128, 0.35);
-    border-bottom: 1px solid rgba(128, 128, 128, 0.35);
-    border-right: 1px solid rgba(128, 128, 128, 0.35);
-
+    border: 1px solid rgba(128, 128, 128, 0.35);
     padding: 9px 10px;
-
     text-align: center;
     white-space: nowrap;
-
-    position: relative;
-    z-index: 1;
-}
-
-.fdr-table th:first-child {
-    border-left: 1px solid rgba(128, 128, 128, 0.35);
 }
 
 
@@ -268,26 +245,11 @@ TABLE_CSS = """
    ========================================================= */
 
 .fdr-table td {
-    border-bottom: 1px solid rgba(128, 128, 128, 0.25);
-    border-right: 1px solid rgba(128, 128, 128, 0.25);
-
+    border: 1px solid rgba(128, 128, 128, 0.25);
     padding: 8px 10px;
-
     text-align: center;
     white-space: nowrap;
-
-    position: relative;
-    z-index: 1;
 }
-
-.fdr-table td:first-child {
-    border-left: 1px solid rgba(128, 128, 128, 0.25);
-}
-
-
-/* =========================================================
-   TEAM COLUMN
-   ========================================================= */
 
 .fdr-table td:first-child {
     text-align: left;
@@ -295,86 +257,55 @@ TABLE_CSS = """
 
 
 /* =========================================================
-   STICKY TEAM COLUMN
+   STICKY TEAM COLUMN — LIGHT MODE
    ========================================================= */
-
-/*
-   IMPORTANT:
-   The sticky cell itself is made into an isolated stacking
-   context with a completely opaque background.
-
-   !important is intentional because Pandas Styler generates
-   inline background-color styles on the cells.
-*/
 
 .fdr-table th:first-child,
 .fdr-table td:first-child {
-
     position: sticky;
     left: 0;
-
     z-index: 100;
-
     min-width: 120px;
 
-    isolation: isolate;
+    /* FIXED OPAQUE BACKGROUND */
+    background-color: #ffffff !important;
 
     border-right: 2px solid rgba(128, 128, 128, 0.45);
 
-    box-shadow:
-        4px 0 7px -4px rgba(0, 0, 0, 0.50);
+    box-shadow: 3px 0 6px -3px rgba(0, 0, 0, 0.45);
 }
 
 
-/* =========================================================
-   OPAQUE BACKGROUND LAYER
-   ========================================================= */
-
-/*
-   Instead of relying solely on the TD background, create a
-   full-size layer inside the sticky cell.
-
-   This layer sits above the scrolling columns but underneath
-   the Team text.
-*/
-
-.fdr-table td:first-child::before {
-    content: "";
-
-    position: absolute;
-
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    z-index: -1;
-
-    pointer-events: none;
-
-    background-color: var(--background-color) !important;
-}
-
-
-/* =========================================================
-   ALTERNATING ROW BACKGROUNDS
-   ========================================================= */
+/* Alternating Team rows */
 
 .fdr-table tbody tr:nth-child(odd) td:first-child {
-    background-color: var(--background-color) !important;
+    background-color: #ffffff !important;
 }
-
-.fdr-table tbody tr:nth-child(odd) td:first-child::before {
-    background-color: var(--background-color) !important;
-}
-
 
 .fdr-table tbody tr:nth-child(even) td:first-child {
-    background-color: var(--secondary-background-color) !important;
+    background-color: #f5f5f5 !important;
 }
 
-.fdr-table tbody tr:nth-child(even) td:first-child::before {
-    background-color: var(--secondary-background-color) !important;
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+[data-theme="dark"] .fdr-table th {
+    background-color: #262730 !important;
+    color: #fafafa !important;
+}
+
+[data-theme="dark"] .fdr-table th:first-child {
+    background-color: #262730 !important;
+}
+
+[data-theme="dark"] .fdr-table tbody tr:nth-child(odd) td:first-child {
+    background-color: #0e1117 !important;
+}
+
+[data-theme="dark"] .fdr-table tbody tr:nth-child(even) td:first-child {
+    background-color: #262730 !important;
 }
 
 
@@ -383,47 +314,21 @@ TABLE_CSS = """
    ========================================================= */
 
 .fdr-table thead th:first-child {
-
     position: sticky;
     left: 0;
-
     z-index: 200;
 
-    background-color: var(--secondary-background-color) !important;
-
-    isolation: isolate;
-
-    box-shadow:
-        4px 0 7px -4px rgba(0, 0, 0, 0.50);
-}
-
-
-/* Header background layer */
-
-.fdr-table thead th:first-child::before {
-    content: "";
-
-    position: absolute;
-
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    z-index: -1;
-
-    background-color: var(--secondary-background-color) !important;
-
-    pointer-events: none;
+    background-color: #f0f2f6 !important;
 }
 
 
 /* =========================================================
-   KEEP ALL SCROLLING CELLS BELOW STICKY COLUMN
+   OTHER CELLS STAY BELOW STICKY COLUMN
    ========================================================= */
 
 .fdr-table th:not(:first-child),
 .fdr-table td:not(:first-child) {
+    position: relative;
     z-index: 1;
 }
 
@@ -434,16 +339,6 @@ TABLE_CSS = """
 
 .fdr-table td:not(:first-child) {
     min-width: 42px;
-}
-
-
-/* =========================================================
-   TEAM / FIXTURE DIVIDER
-   ========================================================= */
-
-.fdr-table th:first-child,
-.fdr-table td:first-child {
-    border-right: 2px solid rgba(128, 128, 128, 0.45);
 }
 
 </style>
