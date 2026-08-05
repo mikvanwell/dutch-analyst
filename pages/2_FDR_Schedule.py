@@ -217,45 +217,98 @@ TABLE_CSS = """
 }
 
 .fdr-table table {
-    border-collapse: collapse;
+    /* Separate borders prevent sticky-cell rendering issues */
+    border-collapse: separate;
+    border-spacing: 0;
     width: 100%;
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
 }
 
+
+/* ---------------------------------------------------------
+   Header
+   --------------------------------------------------------- */
+
 .fdr-table th {
     background-color: var(--secondary-background-color);
     color: var(--text-color);
     font-weight: 700;
-    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-top: 1px solid rgba(128, 128, 128, 0.35);
+    border-bottom: 1px solid rgba(128, 128, 128, 0.35);
+    border-right: 1px solid rgba(128, 128, 128, 0.35);
     padding: 9px 10px;
     text-align: center;
     white-space: nowrap;
 }
 
+.fdr-table th:first-child {
+    border-left: 1px solid rgba(128, 128, 128, 0.35);
+}
+
+
+/* ---------------------------------------------------------
+   Cells
+   --------------------------------------------------------- */
+
 .fdr-table td {
-    border: 1px solid rgba(128, 128, 128, 0.25);
+    border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+    border-right: 1px solid rgba(128, 128, 128, 0.25);
     padding: 8px 10px;
     text-align: center;
     white-space: nowrap;
 }
 
-/* Team names */
+.fdr-table td:first-child {
+    border-left: 1px solid rgba(128, 128, 128, 0.25);
+}
+
+
+/* ---------------------------------------------------------
+   Team names
+   --------------------------------------------------------- */
+
 .fdr-table td:first-child {
     text-align: left;
 }
 
-/* Sticky Team column */
+
+/* ---------------------------------------------------------
+   STICKY TEAM COLUMN
+   --------------------------------------------------------- */
+
+/*
+   The Team column gets an explicit opaque background and a
+   high z-index so that fixture cells can never show through
+   while horizontally scrolling.
+*/
+
 .fdr-table th:first-child,
 .fdr-table td:first-child {
     position: sticky;
     left: 0;
-    z-index: 5;
+
+    /* Keep Team column above all fixture cells */
+    z-index: 10;
+
+    /* Important: opaque background */
+    background-color: var(--background-color);
+
     min-width: 120px;
-    border-right: 2px solid rgba(128, 128, 128, 0.45);
+
+    /* Visual separation */
+    box-shadow:
+        3px 0 6px -3px rgba(0, 0, 0, 0.45);
+
+    /* Prevent background bleed */
+    isolation: isolate;
 }
 
-/* Alternating colours for sticky Team cells */
+
+/* ---------------------------------------------------------
+   Alternating colours for sticky Team cells
+   --------------------------------------------------------- */
+
 .fdr-table tbody tr:nth-child(odd) td:first-child {
     background-color: var(--background-color);
 }
@@ -264,7 +317,70 @@ TABLE_CSS = """
     background-color: var(--secondary-background-color);
 }
 
-/* Slightly smaller fixture cells */
+
+/* ---------------------------------------------------------
+   Sticky header
+   --------------------------------------------------------- */
+
+.fdr-table thead th:first-child {
+    background-color: var(--secondary-background-color);
+    z-index: 20;
+}
+
+
+/* ---------------------------------------------------------
+   Extra opaque layer on right edge of sticky column
+   --------------------------------------------------------- */
+
+/*
+   This provides a small solid buffer between the sticky Team
+   column and the horizontally scrolling fixture columns.
+   It prevents any underlying cells from visually bleeding
+   through during horizontal scrolling.
+*/
+
+.fdr-table th:first-child::after,
+.fdr-table td:first-child::after {
+    content: "";
+    position: absolute;
+
+    top: 0;
+    right: -4px;
+
+    width: 5px;
+    height: 100%;
+
+    background-color: inherit;
+
+    pointer-events: none;
+}
+
+
+/* ---------------------------------------------------------
+   Keep non-sticky cells underneath
+   --------------------------------------------------------- */
+
+.fdr-table th:not(:first-child),
+.fdr-table td:not(:first-child) {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* ---------------------------------------------------------
+   Separate Team column from fixture data
+   --------------------------------------------------------- */
+
+.fdr-table th:first-child,
+.fdr-table td:first-child {
+    border-right: 2px solid rgba(128, 128, 128, 0.45);
+}
+
+
+/* ---------------------------------------------------------
+   Fixture cells
+   --------------------------------------------------------- */
+
 .fdr-table td:not(:first-child) {
     min-width: 42px;
 }

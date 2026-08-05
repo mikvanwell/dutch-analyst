@@ -143,7 +143,6 @@ def style_dataframe(df):
 # than hardcoded hex values, so the table follows the app's light/dark
 # theme automatically. Borders use a translucent grey (rgba) so they read
 # correctly against either a light or dark background.
-
 TABLE_CSS = """
 <style>
 
@@ -153,15 +152,16 @@ TABLE_CSS = """
 }
 
 .player-analysis-table table {
-    /* "separate" (not "collapse") avoids a browser rendering bug where
-       collapsed borders get drawn on top of sticky cells while scrolling,
-       causing scrolled-past columns to visually bleed through. */
     border-collapse: separate;
     border-spacing: 0;
     width: 100%;
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
 }
+
+/* ---------------------------------------------------------
+   Header
+   --------------------------------------------------------- */
 
 .player-analysis-table th {
     background-color: var(--secondary-background-color);
@@ -179,6 +179,11 @@ TABLE_CSS = """
     border-left: 1px solid rgba(128, 128, 128, 0.35);
 }
 
+
+/* ---------------------------------------------------------
+   Cells
+   --------------------------------------------------------- */
+
 .player-analysis-table td {
     border-bottom: 1px solid rgba(128, 128, 128, 0.25);
     border-right: 1px solid rgba(128, 128, 128, 0.25);
@@ -191,24 +196,51 @@ TABLE_CSS = """
     border-left: 1px solid rgba(128, 128, 128, 0.25);
 }
 
-/* Player and team names */
+
+/* ---------------------------------------------------------
+   Player and Team alignment
+   --------------------------------------------------------- */
+
 .player-analysis-table td:nth-child(1),
 .player-analysis-table td:nth-child(2) {
     text-align: left;
 }
 
-/* Sticky player column. The box-shadow (rather than relying on the cell
-   border) gives a clean visual edge that sits above scrolled-past columns
-   regardless of border-rendering quirks. */
+
+/* ---------------------------------------------------------
+   STICKY PLAYER COLUMN
+   --------------------------------------------------------- */
+
+/*
+   Important:
+   The sticky cell gets an explicit opaque background.
+   The pseudo-element creates an additional solid layer on
+   the right side of the sticky column so no horizontally
+   scrolled content can bleed through.
+*/
+
 .player-analysis-table th:first-child,
 .player-analysis-table td:first-child {
     position: sticky;
     left: 0;
-    z-index: 5;
-    box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.35);
+    z-index: 10;
+
+    /* Force an opaque background */
+    background-color: var(--background-color);
+
+    /* Keep the cell above all scrolling columns */
+    isolation: isolate;
+
+    /* Visual separation */
+    box-shadow:
+        3px 0 6px -3px rgba(0, 0, 0, 0.45);
 }
 
-/* Keep sticky cell consistent with alternating rows */
+
+/* ---------------------------------------------------------
+   Sticky Player column - alternating rows
+   --------------------------------------------------------- */
+
 .player-analysis-table tbody tr:nth-child(odd) td:first-child {
     background-color: var(--background-color);
 }
@@ -217,10 +249,54 @@ TABLE_CSS = """
     background-color: var(--secondary-background-color);
 }
 
-/* Separate player information from gameweek data */
+
+/* ---------------------------------------------------------
+   Sticky header
+   --------------------------------------------------------- */
+
+.player-analysis-table thead th:first-child {
+    background-color: var(--secondary-background-color);
+    z-index: 20;
+}
+
+
+/* ---------------------------------------------------------
+   Extra opaque layer on right edge
+   --------------------------------------------------------- */
+
+.player-analysis-table th:first-child::after,
+.player-analysis-table td:first-child::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -4px;
+    width: 5px;
+    height: 100%;
+
+    background-color: inherit;
+
+    pointer-events: none;
+}
+
+
+/* ---------------------------------------------------------
+   Separate player information from gameweek data
+   --------------------------------------------------------- */
+
 .player-analysis-table th:nth-child(8),
 .player-analysis-table td:nth-child(8) {
     border-right: 2px solid rgba(128, 128, 128, 0.45);
+}
+
+
+/* ---------------------------------------------------------
+   Make sure all non-sticky cells remain underneath
+   --------------------------------------------------------- */
+
+.player-analysis-table th:not(:first-child),
+.player-analysis-table td:not(:first-child) {
+    position: relative;
+    z-index: 1;
 }
 
 </style>
