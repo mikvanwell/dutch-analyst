@@ -190,22 +190,12 @@ TABLE_CSS = """
     z-index: 5;
 }
 
-/* Sticky team column */
-.player-analysis-table th:nth-child(2),
-.player-analysis-table td:nth-child(2) {
-    position: sticky;
-    left: 120px;
-    z-index: 4;
-}
-
-/* Keep sticky cells consistent with alternating rows */
-.player-analysis-table tbody tr:nth-child(odd) td:first-child,
-.player-analysis-table tbody tr:nth-child(odd) td:nth-child(2) {
+/* Keep sticky cell consistent with alternating rows */
+.player-analysis-table tbody tr:nth-child(odd) td:first-child {
     background-color: var(--background-color);
 }
 
-.player-analysis-table tbody tr:nth-child(even) td:first-child,
-.player-analysis-table tbody tr:nth-child(even) td:nth-child(2) {
+.player-analysis-table tbody tr:nth-child(even) td:first-child {
     background-color: var(--secondary-background-color);
 }
 
