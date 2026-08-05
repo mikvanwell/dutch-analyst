@@ -211,13 +211,22 @@ def style_dataframe(df, score_map):
 TABLE_CSS = """
 <style>
 
+/* =========================================================
+   TABLE CONTAINER
+   ========================================================= */
+
 .fdr-table {
     width: 100%;
     overflow-x: auto;
+    position: relative;
 }
 
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
 .fdr-table table {
-    /* Separate borders prevent sticky-cell rendering issues */
     border-collapse: separate;
     border-spacing: 0;
     width: 100%;
@@ -226,20 +235,27 @@ TABLE_CSS = """
 }
 
 
-/* ---------------------------------------------------------
-   Header
-   --------------------------------------------------------- */
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .fdr-table th {
     background-color: var(--secondary-background-color);
     color: var(--text-color);
+
     font-weight: 700;
+
     border-top: 1px solid rgba(128, 128, 128, 0.35);
     border-bottom: 1px solid rgba(128, 128, 128, 0.35);
     border-right: 1px solid rgba(128, 128, 128, 0.35);
+
     padding: 9px 10px;
+
     text-align: center;
     white-space: nowrap;
+
+    position: relative;
+    z-index: 1;
 }
 
 .fdr-table th:first-child {
@@ -247,16 +263,21 @@ TABLE_CSS = """
 }
 
 
-/* ---------------------------------------------------------
-   Cells
-   --------------------------------------------------------- */
+/* =========================================================
+   CELLS
+   ========================================================= */
 
 .fdr-table td {
     border-bottom: 1px solid rgba(128, 128, 128, 0.25);
     border-right: 1px solid rgba(128, 128, 128, 0.25);
+
     padding: 8px 10px;
+
     text-align: center;
     white-space: nowrap;
+
+    position: relative;
+    z-index: 1;
 }
 
 .fdr-table td:first-child {
@@ -264,125 +285,165 @@ TABLE_CSS = """
 }
 
 
-/* ---------------------------------------------------------
-   Team names
-   --------------------------------------------------------- */
+/* =========================================================
+   TEAM COLUMN
+   ========================================================= */
 
 .fdr-table td:first-child {
     text-align: left;
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================================
    STICKY TEAM COLUMN
-   --------------------------------------------------------- */
+   ========================================================= */
 
 /*
-   The Team column gets an explicit opaque background and a
-   high z-index so that fixture cells can never show through
-   while horizontally scrolling.
+   IMPORTANT:
+   The sticky cell itself is made into an isolated stacking
+   context with a completely opaque background.
+
+   !important is intentional because Pandas Styler generates
+   inline background-color styles on the cells.
 */
 
 .fdr-table th:first-child,
 .fdr-table td:first-child {
+
     position: sticky;
     left: 0;
 
-    /* Keep Team column above all fixture cells */
-    z-index: 10;
-
-    /* Important: opaque background */
-    background-color: var(--background-color);
+    z-index: 100;
 
     min-width: 120px;
 
-    /* Visual separation */
-    box-shadow:
-        3px 0 6px -3px rgba(0, 0, 0, 0.45);
-
-    /* Prevent background bleed */
     isolation: isolate;
+
+    border-right: 2px solid rgba(128, 128, 128, 0.45);
+
+    box-shadow:
+        4px 0 7px -4px rgba(0, 0, 0, 0.50);
 }
 
 
-/* ---------------------------------------------------------
-   Alternating colours for sticky Team cells
-   --------------------------------------------------------- */
-
-.fdr-table tbody tr:nth-child(odd) td:first-child {
-    background-color: var(--background-color);
-}
-
-.fdr-table tbody tr:nth-child(even) td:first-child {
-    background-color: var(--secondary-background-color);
-}
-
-
-/* ---------------------------------------------------------
-   Sticky header
-   --------------------------------------------------------- */
-
-.fdr-table thead th:first-child {
-    background-color: var(--secondary-background-color);
-    z-index: 20;
-}
-
-
-/* ---------------------------------------------------------
-   Extra opaque layer on right edge of sticky column
-   --------------------------------------------------------- */
+/* =========================================================
+   OPAQUE BACKGROUND LAYER
+   ========================================================= */
 
 /*
-   This provides a small solid buffer between the sticky Team
-   column and the horizontally scrolling fixture columns.
-   It prevents any underlying cells from visually bleeding
-   through during horizontal scrolling.
+   Instead of relying solely on the TD background, create a
+   full-size layer inside the sticky cell.
+
+   This layer sits above the scrolling columns but underneath
+   the Team text.
 */
 
-.fdr-table th:first-child::after,
-.fdr-table td:first-child::after {
+.fdr-table td:first-child::before {
     content: "";
+
     position: absolute;
 
     top: 0;
-    right: -4px;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-    width: 5px;
-    height: 100%;
+    z-index: -1;
 
-    background-color: inherit;
+    pointer-events: none;
+
+    background-color: var(--background-color) !important;
+}
+
+
+/* =========================================================
+   ALTERNATING ROW BACKGROUNDS
+   ========================================================= */
+
+.fdr-table tbody tr:nth-child(odd) td:first-child {
+    background-color: var(--background-color) !important;
+}
+
+.fdr-table tbody tr:nth-child(odd) td:first-child::before {
+    background-color: var(--background-color) !important;
+}
+
+
+.fdr-table tbody tr:nth-child(even) td:first-child {
+    background-color: var(--secondary-background-color) !important;
+}
+
+.fdr-table tbody tr:nth-child(even) td:first-child::before {
+    background-color: var(--secondary-background-color) !important;
+}
+
+
+/* =========================================================
+   STICKY HEADER
+   ========================================================= */
+
+.fdr-table thead th:first-child {
+
+    position: sticky;
+    left: 0;
+
+    z-index: 200;
+
+    background-color: var(--secondary-background-color) !important;
+
+    isolation: isolate;
+
+    box-shadow:
+        4px 0 7px -4px rgba(0, 0, 0, 0.50);
+}
+
+
+/* Header background layer */
+
+.fdr-table thead th:first-child::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: -1;
+
+    background-color: var(--secondary-background-color) !important;
 
     pointer-events: none;
 }
 
 
-/* ---------------------------------------------------------
-   Keep non-sticky cells underneath
-   --------------------------------------------------------- */
+/* =========================================================
+   KEEP ALL SCROLLING CELLS BELOW STICKY COLUMN
+   ========================================================= */
 
 .fdr-table th:not(:first-child),
 .fdr-table td:not(:first-child) {
-    position: relative;
     z-index: 1;
 }
 
 
-/* ---------------------------------------------------------
-   Separate Team column from fixture data
-   --------------------------------------------------------- */
+/* =========================================================
+   FIXTURE CELLS
+   ========================================================= */
+
+.fdr-table td:not(:first-child) {
+    min-width: 42px;
+}
+
+
+/* =========================================================
+   TEAM / FIXTURE DIVIDER
+   ========================================================= */
 
 .fdr-table th:first-child,
 .fdr-table td:first-child {
     border-right: 2px solid rgba(128, 128, 128, 0.45);
-}
-
-
-/* ---------------------------------------------------------
-   Fixture cells
-   --------------------------------------------------------- */
-
-.fdr-table td:not(:first-child) {
-    min-width: 42px;
 }
 
 </style>
