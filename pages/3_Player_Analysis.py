@@ -85,9 +85,6 @@ def prepare_data(df):
 # ---------------------------------------------------------
 # Style dataframe
 # ---------------------------------------------------------
-# Uses Streamlit's theme CSS variables so the alternating stripe colours
-# (and the text colour) automatically match whichever theme (light/dark)
-# the user has selected, instead of being hardcoded to white/black.
 
 def style_dataframe(df):
 
@@ -138,18 +135,24 @@ def style_dataframe(df):
 # ---------------------------------------------------------
 # Table CSS
 # ---------------------------------------------------------
-# Backgrounds, text and borders below use Streamlit's theme CSS variables
-# (--background-color, --secondary-background-color, --text-color) rather
-# than hardcoded hex values, so the table follows the app's light/dark
-# theme automatically. Borders use a translucent grey (rgba) so they read
-# correctly against either a light or dark background.
+
 TABLE_CSS = """
 <style>
+
+/* =========================================================
+   TABLE CONTAINER
+   ========================================================= */
 
 .player-analysis-table {
     width: 100%;
     overflow-x: auto;
+    position: relative;
 }
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
 
 .player-analysis-table table {
     border-collapse: separate;
@@ -159,144 +162,201 @@ TABLE_CSS = """
     font-size: 14px;
 }
 
-/* ---------------------------------------------------------
-   Header
-   --------------------------------------------------------- */
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .player-analysis-table th {
-    background-color: var(--secondary-background-color);
-    color: var(--text-color);
+
+    background-color: #f0f2f6;
+    color: #262730;
+
     font-weight: 700;
+
     border-top: 1px solid rgba(128, 128, 128, 0.35);
     border-bottom: 1px solid rgba(128, 128, 128, 0.35);
     border-right: 1px solid rgba(128, 128, 128, 0.35);
+
     padding: 9px 12px;
+
     text-align: center;
     white-space: nowrap;
+
+    position: relative;
+    z-index: 1;
 }
+
 
 .player-analysis-table th:first-child {
+
     border-left: 1px solid rgba(128, 128, 128, 0.35);
+
 }
 
 
-/* ---------------------------------------------------------
-   Cells
-   --------------------------------------------------------- */
+/* =========================================================
+   CELLS
+   ========================================================= */
 
 .player-analysis-table td {
+
     border-bottom: 1px solid rgba(128, 128, 128, 0.25);
     border-right: 1px solid rgba(128, 128, 128, 0.25);
+
     padding: 8px 12px;
+
     text-align: center;
     white-space: nowrap;
+
+    position: relative;
+    z-index: 1;
 }
+
 
 .player-analysis-table td:first-child {
+
     border-left: 1px solid rgba(128, 128, 128, 0.25);
+
 }
 
 
-/* ---------------------------------------------------------
-   Player and Team alignment
-   --------------------------------------------------------- */
+/* =========================================================
+   PLAYER AND TEAM ALIGNMENT
+   ========================================================= */
 
 .player-analysis-table td:nth-child(1),
 .player-analysis-table td:nth-child(2) {
+
     text-align: left;
+
 }
 
 
-/* ---------------------------------------------------------
+/* =========================================================
    STICKY PLAYER COLUMN
-   --------------------------------------------------------- */
-
-/*
-   Important:
-   The sticky cell gets an explicit opaque background.
-   The pseudo-element creates an additional solid layer on
-   the right side of the sticky column so no horizontally
-   scrolled content can bleed through.
-*/
+   ========================================================= */
 
 .player-analysis-table th:first-child,
 .player-analysis-table td:first-child {
+
     position: sticky;
     left: 0;
-    z-index: 10;
 
-    /* Force an opaque background */
-    background-color: var(--background-color);
+    z-index: 100;
 
-    /* Keep the cell above all scrolling columns */
-    isolation: isolate;
+    min-width: 150px;
 
-    /* Visual separation */
+    border-right: 2px solid rgba(128, 128, 128, 0.45);
+
     box-shadow:
         3px 0 6px -3px rgba(0, 0, 0, 0.45);
+
 }
 
 
-/* ---------------------------------------------------------
-   Sticky Player column - alternating rows
-   --------------------------------------------------------- */
+/* =========================================================
+   LIGHT MODE — STICKY PLAYER COLUMN
+   ========================================================= */
 
 .player-analysis-table tbody tr:nth-child(odd) td:first-child {
-    background-color: var(--background-color);
+
+    background-color: #ffffff !important;
+    color: #262730 !important;
+
 }
+
 
 .player-analysis-table tbody tr:nth-child(even) td:first-child {
-    background-color: var(--secondary-background-color);
+
+    background-color: #f5f5f5 !important;
+    color: #262730 !important;
+
 }
 
 
-/* ---------------------------------------------------------
-   Sticky header
-   --------------------------------------------------------- */
+/* =========================================================
+   DARK MODE — STICKY PLAYER COLUMN
+   ========================================================= */
+
+[data-theme="dark"] .player-analysis-table tbody tr:nth-child(odd) td:first-child {
+
+    background-color: #0e1117 !important;
+    color: #fafafa !important;
+
+}
+
+
+[data-theme="dark"] .player-analysis-table tbody tr:nth-child(even) td:first-child {
+
+    background-color: #262730 !important;
+    color: #fafafa !important;
+
+}
+
+
+/* =========================================================
+   STICKY HEADER
+   ========================================================= */
 
 .player-analysis-table thead th:first-child {
-    background-color: var(--secondary-background-color);
-    z-index: 20;
+
+    position: sticky;
+    left: 0;
+
+    z-index: 200;
+
+    background-color: #f0f2f6 !important;
+    color: #262730 !important;
+
 }
 
 
-/* ---------------------------------------------------------
-   Extra opaque layer on right edge
-   --------------------------------------------------------- */
+/* =========================================================
+   DARK MODE — STICKY HEADER
+   ========================================================= */
 
-.player-analysis-table th:first-child::after,
-.player-analysis-table td:first-child::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -4px;
-    width: 5px;
-    height: 100%;
+[data-theme="dark"] .player-analysis-table thead th:first-child {
 
-    background-color: inherit;
+    background-color: #262730 !important;
+    color: #fafafa !important;
 
-    pointer-events: none;
 }
 
 
-/* ---------------------------------------------------------
-   Separate player information from gameweek data
-   --------------------------------------------------------- */
-
-.player-analysis-table th:nth-child(8),
-.player-analysis-table td:nth-child(8) {
-    border-right: 2px solid rgba(128, 128, 128, 0.45);
-}
-
-
-/* ---------------------------------------------------------
-   Make sure all non-sticky cells remain underneath
-   --------------------------------------------------------- */
+/* =========================================================
+   KEEP SCROLLING COLUMNS BELOW STICKY COLUMN
+   ========================================================= */
 
 .player-analysis-table th:not(:first-child),
 .player-analysis-table td:not(:first-child) {
+
     position: relative;
     z-index: 1;
+
+}
+
+
+/* =========================================================
+   SEPARATE PLAYER INFORMATION FROM GAMEWEEK DATA
+   ========================================================= */
+
+.player-analysis-table th:nth-child(8),
+.player-analysis-table td:nth-child(8) {
+
+    border-right: 2px solid rgba(128, 128, 128, 0.45);
+
+}
+
+
+/* =========================================================
+   GAMEWEEK CELLS
+   ========================================================= */
+
+.player-analysis-table td:not(:first-child) {
+
+    min-width: 50px;
+
 }
 
 </style>
@@ -332,7 +392,10 @@ def main():
         return
 
 
+    # -----------------------------------------------------
     # Prepare data
+    # -----------------------------------------------------
+
     player_data = prepare_data(player_data)
 
 
