@@ -38,7 +38,7 @@ st.markdown(
 @st.cache_data
 def load_data():
 
-    df = pd.read_excel("xpts_playground.xlsx")
+    df = pd.read_excel("xpts_schedule.xlsx")
 
     return df
 
@@ -85,6 +85,9 @@ def prepare_data(df):
 # ---------------------------------------------------------
 # Style dataframe
 # ---------------------------------------------------------
+# Uses Streamlit's theme CSS variables so the alternating stripe colours
+# (and the text colour) automatically match whichever theme (light/dark)
+# the user has selected, instead of being hardcoded to white/black.
 
 def style_dataframe(df):
 
@@ -98,11 +101,13 @@ def style_dataframe(df):
         if row.name % 2 == 0:
 
             return [
-                "background-color: #ffffff;"
+                "background-color: var(--background-color); "
+                "color: var(--text-color);"
             ] * len(row)
 
         return [
-            "background-color: #f5f5f5;"
+            "background-color: var(--secondary-background-color); "
+            "color: var(--text-color);"
         ] * len(row)
 
     styled = df.style.apply(
@@ -133,6 +138,11 @@ def style_dataframe(df):
 # ---------------------------------------------------------
 # Table CSS
 # ---------------------------------------------------------
+# Backgrounds, text and borders below use Streamlit's theme CSS variables
+# (--background-color, --secondary-background-color, --text-color) rather
+# than hardcoded hex values, so the table follows the app's light/dark
+# theme automatically. Borders use a translucent grey (rgba) so they read
+# correctly against either a light or dark background.
 
 TABLE_CSS = """
 <style>
@@ -150,17 +160,17 @@ TABLE_CSS = """
 }
 
 .player-analysis-table th {
-    background-color: #f2f2f2;
-    color: #222;
+    background-color: var(--secondary-background-color);
+    color: var(--text-color);
     font-weight: 700;
-    border: 1px solid #d9d9d9;
+    border: 1px solid rgba(128, 128, 128, 0.35);
     padding: 9px 12px;
     text-align: center;
     white-space: nowrap;
 }
 
 .player-analysis-table td {
-    border: 1px solid #e0e0e0;
+    border: 1px solid rgba(128, 128, 128, 0.25);
     padding: 8px 12px;
     text-align: center;
     white-space: nowrap;
@@ -191,18 +201,18 @@ TABLE_CSS = """
 /* Keep sticky cells consistent with alternating rows */
 .player-analysis-table tbody tr:nth-child(odd) td:first-child,
 .player-analysis-table tbody tr:nth-child(odd) td:nth-child(2) {
-    background-color: #ffffff;
+    background-color: var(--background-color);
 }
 
 .player-analysis-table tbody tr:nth-child(even) td:first-child,
 .player-analysis-table tbody tr:nth-child(even) td:nth-child(2) {
-    background-color: #f5f5f5;
+    background-color: var(--secondary-background-color);
 }
 
 /* Separate player information from gameweek data */
 .player-analysis-table th:nth-child(8),
 .player-analysis-table td:nth-child(8) {
-    border-right: 2px solid #bdbdbd;
+    border-right: 2px solid rgba(128, 128, 128, 0.45);
 }
 
 </style>
@@ -223,7 +233,7 @@ def main():
     except FileNotFoundError:
 
         st.error(
-            "Please make sure 'xpts_playground.xlsx' "
+            "Please make sure 'xpts_schedule.xlsx' "
             "is in the same directory as the Streamlit app."
         )
 
@@ -232,7 +242,7 @@ def main():
     except Exception as e:
 
         st.error(
-            f"Unable to read 'xpts_playground.xlsx': {e}"
+            f"Unable to read 'xpts_schedule.xlsx': {e}"
         )
 
         return

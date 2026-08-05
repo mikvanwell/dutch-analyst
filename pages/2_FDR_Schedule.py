@@ -77,43 +77,46 @@ def build_score_maps(fdr_small):
 # ---------------------------------------------------------
 # FDR colour scheme
 # ---------------------------------------------------------
+# NOTE: the FDR bands use fixed accent colours (green -> grey -> red)
+# regardless of light/dark theme, since these are meaningful data colours,
+# not chrome. Each band explicitly sets a text colour with guaranteed
+# contrast against its own background, so it stays legible in either theme.
 
 def get_color_from_score(score):
 
     if pd.isna(score):
-        return (
-            "background-color: #ffffff;"
-            "color: #222222;"
-        )
+        # Let the alternating row colour show through instead of forcing
+        # a hardcoded light background.
+        return "background-color: transparent;"
 
     elif score < 0.15:
         return (
             "background-color: #006400;"
-            "color: white;"
+            "color: #ffffff;"
         )
 
     elif score < 0.4:
         return (
             "background-color: #01fc79;"
-            "color: #222222;"
+            "color: #063d1f;"
         )
 
     elif score < 0.6:
         return (
             "background-color: #e7e7e7;"
-            "color: #222222;"
+            "color: #1a1a1a;"
         )
 
     elif score < 0.85:
         return (
             "background-color: #ff1751;"
-            "color: white;"
+            "color: #ffffff;"
         )
 
     else:
         return (
             "background-color: #80082e;"
-            "color: white;"
+            "color: #ffffff;"
         )
 
 
@@ -134,17 +137,22 @@ def style_dataframe(df, score_map):
     # -----------------------------------------------------
     # Alternating row styling
     # -----------------------------------------------------
+    # Uses Streamlit's theme CSS variables so the stripe colours (and the
+    # text colour) automatically match whichever theme (light/dark) the
+    # user has selected, instead of being hardcoded to white/black.
 
     def row_style(row):
 
         if row.name % 2 == 0:
 
             return [
-                "background-color: #ffffff;"
+                "background-color: var(--background-color); "
+                "color: var(--text-color);"
             ] * len(row)
 
         return [
-            "background-color: #f5f5f5;"
+            "background-color: var(--secondary-background-color); "
+            "color: var(--text-color);"
         ] * len(row)
 
 
@@ -194,6 +202,11 @@ def style_dataframe(df, score_map):
 # ---------------------------------------------------------
 # Table CSS
 # ---------------------------------------------------------
+# Backgrounds, text and borders below use Streamlit's theme CSS variables
+# (--background-color, --secondary-background-color, --text-color) rather
+# than hardcoded hex values, so the table follows the app's light/dark
+# theme automatically. Borders use a translucent grey (rgba) so they read
+# correctly against either a light or dark background.
 
 TABLE_CSS = """
 <style>
@@ -211,17 +224,17 @@ TABLE_CSS = """
 }
 
 .fdr-table th {
-    background-color: #f2f2f2;
-    color: #222;
+    background-color: var(--secondary-background-color);
+    color: var(--text-color);
     font-weight: 700;
-    border: 1px solid #d9d9d9;
+    border: 1px solid rgba(128, 128, 128, 0.35);
     padding: 9px 10px;
     text-align: center;
     white-space: nowrap;
 }
 
 .fdr-table td {
-    border: 1px solid #e0e0e0;
+    border: 1px solid rgba(128, 128, 128, 0.25);
     padding: 8px 10px;
     text-align: center;
     white-space: nowrap;
@@ -239,16 +252,16 @@ TABLE_CSS = """
     left: 0;
     z-index: 5;
     min-width: 120px;
-    border-right: 2px solid #bdbdbd;
+    border-right: 2px solid rgba(128, 128, 128, 0.45);
 }
 
 /* Alternating colours for sticky Team cells */
 .fdr-table tbody tr:nth-child(odd) td:first-child {
-    background-color: #ffffff;
+    background-color: var(--background-color);
 }
 
 .fdr-table tbody tr:nth-child(even) td:first-child {
-    background-color: #f5f5f5;
+    background-color: var(--secondary-background-color);
 }
 
 /* Slightly smaller fixture cells */
@@ -263,6 +276,9 @@ TABLE_CSS = """
 # ---------------------------------------------------------
 # FDR Legend
 # ---------------------------------------------------------
+# The legend swatches also use fixed accent colours (matching the table),
+# with a text colour chosen per swatch for guaranteed contrast in both
+# light and dark themes.
 
 def display_legend():
 
@@ -279,7 +295,7 @@ def display_legend():
                 background-color: #006400;
                 padding: 10px;
                 text-align: center;
-                color: white;
+                color: #ffffff;
                 border-radius: 5px;
                 font-family: 'DM Sans', sans-serif;
             ">
@@ -298,7 +314,7 @@ def display_legend():
                 background-color: #01fc79;
                 padding: 10px;
                 text-align: center;
-                color: #222;
+                color: #063d1f;
                 border-radius: 5px;
                 font-family: 'DM Sans', sans-serif;
             ">
@@ -317,7 +333,7 @@ def display_legend():
                 background-color: #e7e7e7;
                 padding: 10px;
                 text-align: center;
-                color: #222;
+                color: #1a1a1a;
                 border-radius: 5px;
                 font-family: 'DM Sans', sans-serif;
             ">
@@ -336,7 +352,7 @@ def display_legend():
                 background-color: #ff1751;
                 padding: 10px;
                 text-align: center;
-                color: white;
+                color: #ffffff;
                 border-radius: 5px;
                 font-family: 'DM Sans', sans-serif;
             ">
@@ -355,7 +371,7 @@ def display_legend():
                 background-color: #80082e;
                 padding: 10px;
                 text-align: center;
-                color: white;
+                color: #ffffff;
                 border-radius: 5px;
                 font-family: 'DM Sans', sans-serif;
             ">

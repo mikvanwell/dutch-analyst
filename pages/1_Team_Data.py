@@ -101,26 +101,32 @@ def prepare_data(df):
 # ---------------------------------------------------------
 # Heatmap colours
 # ---------------------------------------------------------
+# NOTE: the heatmap bands use fixed accent colours (green -> grey -> red)
+# regardless of light/dark theme, since these are meaningful data colours,
+# not chrome. Each band explicitly sets a text colour with guaranteed
+# contrast against its own background, so it stays legible in either theme.
 
 def get_color_from_score(score):
 
     if pd.isna(score):
-        return "background-color: white"
+        # Let the alternating row colour show through instead of forcing
+        # a hardcoded light/dark background.
+        return "background-color: transparent"
 
     elif score < 0.15:
-        return "background-color: #006400; color: white"
+        return "background-color: #006400; color: #ffffff"
 
     elif score < 0.4:
-        return "background-color: #01fc79"
+        return "background-color: #01fc79; color: #063d1f"
 
     elif score < 0.6:
-        return "background-color: #e7e7e7"
+        return "background-color: #e7e7e7; color: #1a1a1a"
 
     elif score < 0.85:
-        return "background-color: #ff1751; color: white"
+        return "background-color: #ff1751; color: #ffffff"
 
     else:
-        return "background-color: #80082e; color: white"
+        return "background-color: #80082e; color: #ffffff"
 
 
 def get_heatmap_score(
@@ -189,19 +195,24 @@ def style_dataframe(df):
     # -----------------------------------------------------
     # Alternating row styling
     # -----------------------------------------------------
+    # Uses Streamlit's theme CSS variables so the stripe colours (and the
+    # text colour) automatically match whichever theme (light/dark) the
+    # user has selected, instead of being hardcoded to white/black.
 
     def row_style(row):
 
         if row.name % 2 == 0:
 
             base_style = (
-                "background-color: #ffffff;"
+                "background-color: var(--background-color); "
+                "color: var(--text-color);"
             )
 
         else:
 
             base_style = (
-                "background-color: #f5f5f5;"
+                "background-color: var(--secondary-background-color); "
+                "color: var(--text-color);"
             )
 
         return [
@@ -275,6 +286,11 @@ def style_dataframe(df):
 # ---------------------------------------------------------
 # Table CSS
 # ---------------------------------------------------------
+# Backgrounds, text and borders below use Streamlit's theme CSS variables
+# (--background-color, --secondary-background-color, --text-color) rather
+# than hardcoded hex values, so the table follows the app's light/dark
+# theme automatically. Borders use a translucent grey (rgba) so they read
+# correctly against either a light or dark background.
 
 TABLE_CSS = """
 <style>
@@ -292,17 +308,17 @@ TABLE_CSS = """
 }
 
 .team-data-table th {
-    background-color: #f2f2f2;
-    color: #222;
+    background-color: var(--secondary-background-color);
+    color: var(--text-color);
     font-weight: 700;
-    border: 1px solid #d9d9d9;
+    border: 1px solid rgba(128, 128, 128, 0.35);
     padding: 9px 12px;
     text-align: center;
     white-space: nowrap;
 }
 
 .team-data-table td {
-    border: 1px solid #e0e0e0;
+    border: 1px solid rgba(128, 128, 128, 0.25);
     padding: 8px 12px;
     text-align: center;
     white-space: nowrap;
@@ -323,17 +339,17 @@ TABLE_CSS = """
 
 /* Keep sticky Team cell consistent with alternating rows */
 .team-data-table tbody tr:nth-child(odd) td:first-child {
-    background-color: #ffffff;
+    background-color: var(--background-color);
 }
 
 .team-data-table tbody tr:nth-child(even) td:first-child {
-    background-color: #f5f5f5;
+    background-color: var(--secondary-background-color);
 }
 
 /* Slightly stronger separation after Team */
 .team-data-table th:first-child,
 .team-data-table td:first-child {
-    border-right: 2px solid #bdbdbd;
+    border-right: 2px solid rgba(128, 128, 128, 0.45);
 }
 
 </style>
