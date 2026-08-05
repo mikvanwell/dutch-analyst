@@ -93,18 +93,22 @@ def style_dataframe(df):
         if col.startswith("GW")
     ]
 
+    # -----------------------------------------------------
+    # Alternating row colours
+    # -----------------------------------------------------
+
     def row_style(row):
 
         if row.name % 2 == 0:
 
             return [
-                "background-color: var(--background-color); "
-                "color: var(--text-color);"
+                "background-color: #ffffff; "
+                "color: #262730;"
             ] * len(row)
 
         return [
-            "background-color: var(--secondary-background-color); "
-            "color: var(--text-color);"
+            "background-color: #f5f5f5; "
+            "color: #262730;"
         ] * len(row)
 
     styled = df.style.apply(
@@ -112,7 +116,10 @@ def style_dataframe(df):
         axis=1
     )
 
+    # -----------------------------------------------------
     # Number formatting
+    # -----------------------------------------------------
+
     format_dict = {
         "Price": "€{:.1f}",
         "xMins": "{:.1f}",
@@ -122,6 +129,7 @@ def style_dataframe(df):
     }
 
     for column in gameweek_columns:
+
         format_dict[column] = "{:.2f}"
 
     styled = styled.format(format_dict)
@@ -144,9 +152,11 @@ TABLE_CSS = """
    ========================================================= */
 
 .player-analysis-table {
+
     width: 100%;
     overflow-x: auto;
     position: relative;
+
 }
 
 
@@ -155,11 +165,15 @@ TABLE_CSS = """
    ========================================================= */
 
 .player-analysis-table table {
+
     border-collapse: separate;
     border-spacing: 0;
+
     width: 100%;
+
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
+
 }
 
 
@@ -169,8 +183,8 @@ TABLE_CSS = """
 
 .player-analysis-table th {
 
-    background-color: #f0f2f6;
-    color: #262730;
+    background-color: #f0f2f6 !important;
+    color: #262730 !important;
 
     font-weight: 700;
 
@@ -181,10 +195,13 @@ TABLE_CSS = """
     padding: 9px 12px;
 
     text-align: center;
+
     white-space: nowrap;
 
     position: relative;
+
     z-index: 1;
+
 }
 
 
@@ -207,10 +224,15 @@ TABLE_CSS = """
     padding: 8px 12px;
 
     text-align: center;
+
     white-space: nowrap;
 
     position: relative;
+
     z-index: 1;
+
+    color: #262730 !important;
+
 }
 
 
@@ -222,7 +244,31 @@ TABLE_CSS = """
 
 
 /* =========================================================
-   PLAYER AND TEAM ALIGNMENT
+   ALTERNATING ROW COLOURS
+   ========================================================= */
+
+/* Odd rows */
+
+.player-analysis-table tbody tr:nth-child(odd) td {
+
+    background-color: #ffffff !important;
+    color: #262730 !important;
+
+}
+
+
+/* Even rows */
+
+.player-analysis-table tbody tr:nth-child(even) td {
+
+    background-color: #f5f5f5 !important;
+    color: #262730 !important;
+
+}
+
+
+/* =========================================================
+   PLAYER + TEAM ALIGNMENT
    ========================================================= */
 
 .player-analysis-table td:nth-child(1),
@@ -241,6 +287,7 @@ TABLE_CSS = """
 .player-analysis-table td:first-child {
 
     position: sticky;
+
     left: 0;
 
     z-index: 100;
@@ -256,7 +303,7 @@ TABLE_CSS = """
 
 
 /* =========================================================
-   LIGHT MODE — STICKY PLAYER COLUMN
+   STICKY PLAYER — ODD ROWS
    ========================================================= */
 
 .player-analysis-table tbody tr:nth-child(odd) td:first-child {
@@ -267,30 +314,14 @@ TABLE_CSS = """
 }
 
 
+/* =========================================================
+   STICKY PLAYER — EVEN ROWS
+   ========================================================= */
+
 .player-analysis-table tbody tr:nth-child(even) td:first-child {
 
     background-color: #f5f5f5 !important;
     color: #262730 !important;
-
-}
-
-
-/* =========================================================
-   DARK MODE — STICKY PLAYER COLUMN
-   ========================================================= */
-
-[data-theme="dark"] .player-analysis-table tbody tr:nth-child(odd) td:first-child {
-
-    background-color: #0e1117 !important;
-    color: #fafafa !important;
-
-}
-
-
-[data-theme="dark"] .player-analysis-table tbody tr:nth-child(even) td:first-child {
-
-    background-color: #262730 !important;
-    color: #fafafa !important;
 
 }
 
@@ -302,6 +333,7 @@ TABLE_CSS = """
 .player-analysis-table thead th:first-child {
 
     position: sticky;
+
     left: 0;
 
     z-index: 200;
@@ -313,13 +345,31 @@ TABLE_CSS = """
 
 
 /* =========================================================
-   DARK MODE — STICKY HEADER
+   EXTRA OPAQUE LAYER
    ========================================================= */
 
-[data-theme="dark"] .player-analysis-table thead th:first-child {
+/*
+   Adds a small solid layer to the right edge of the sticky
+   Player column. This prevents horizontally scrolling
+   columns from visually bleeding through the sticky cell.
+*/
 
-    background-color: #262730 !important;
-    color: #fafafa !important;
+.player-analysis-table th:first-child::after,
+.player-analysis-table td:first-child::after {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    right: -4px;
+
+    width: 5px;
+    height: 100%;
+
+    background-color: inherit;
+
+    pointer-events: none;
 
 }
 
@@ -332,6 +382,7 @@ TABLE_CSS = """
 .player-analysis-table td:not(:first-child) {
 
     position: relative;
+
     z-index: 1;
 
 }
@@ -359,6 +410,64 @@ TABLE_CSS = """
 
 }
 
+
+/* =========================================================
+   FORCE IDENTICAL COLOURS IN DARK MODE
+   ========================================================= */
+
+/*
+   The surrounding Streamlit app can be in dark mode, but
+   the table deliberately remains identical to light mode.
+*/
+
+
+[data-theme="dark"] .player-analysis-table th {
+
+    background-color: #f0f2f6 !important;
+    color: #262730 !important;
+
+}
+
+
+[data-theme="dark"] .player-analysis-table tbody tr:nth-child(odd) td {
+
+    background-color: #ffffff !important;
+    color: #262730 !important;
+
+}
+
+
+[data-theme="dark"] .player-analysis-table tbody tr:nth-child(even) td {
+
+    background-color: #f5f5f5 !important;
+    color: #262730 !important;
+
+}
+
+
+[data-theme="dark"] .player-analysis-table tbody tr:nth-child(odd) td:first-child {
+
+    background-color: #ffffff !important;
+    color: #262730 !important;
+
+}
+
+
+[data-theme="dark"] .player-analysis-table tbody tr:nth-child(even) td:first-child {
+
+    background-color: #f5f5f5 !important;
+    color: #262730 !important;
+
+}
+
+
+[data-theme="dark"] .player-analysis-table thead th:first-child {
+
+    background-color: #f0f2f6 !important;
+    color: #262730 !important;
+
+}
+
 </style>
 """
 
@@ -369,7 +478,10 @@ TABLE_CSS = """
 
 def main():
 
+    # -----------------------------------------------------
     # Load Excel file
+    # -----------------------------------------------------
+
     try:
 
         player_data = load_data()
@@ -405,10 +517,15 @@ def main():
 
     st.markdown("### Filter & Sort Players")
 
-    col1, col2, col3, col4 = st.columns([1, 1, 1.5, 1])
+    col1, col2, col3, col4 = st.columns(
+        [1, 1, 1.5, 1]
+    )
 
 
+    # -----------------------------------------------------
     # Position filter
+    # -----------------------------------------------------
+
     with col1:
 
         positions = ["All"] + sorted(
@@ -424,7 +541,10 @@ def main():
         )
 
 
+    # -----------------------------------------------------
     # Team filter
+    # -----------------------------------------------------
+
     with col2:
 
         teams = ["All"] + sorted(
@@ -440,7 +560,10 @@ def main():
         )
 
 
+    # -----------------------------------------------------
     # Price filter
+    # -----------------------------------------------------
+
     with col3:
 
         min_price = float(
@@ -460,7 +583,10 @@ def main():
         )
 
 
+    # -----------------------------------------------------
     # Sort column
+    # -----------------------------------------------------
+
     with col4:
 
         sort_options = [
@@ -486,11 +612,16 @@ def main():
 
     sort_ascending = st.radio(
         "Sort direction",
-        options=["Highest → Lowest", "Lowest → Highest"],
+        options=[
+            "Highest → Lowest",
+            "Lowest → Highest"
+        ],
         horizontal=True
     )
 
-    ascending = sort_ascending == "Lowest → Highest"
+    ascending = (
+        sort_ascending == "Lowest → Highest"
+    )
 
 
     # -----------------------------------------------------
@@ -524,10 +655,14 @@ def main():
     # Sort data
     # -----------------------------------------------------
 
-    filtered_data = filtered_data.sort_values(
-        by=selected_sort,
-        ascending=ascending
-    ).reset_index(drop=True)
+    filtered_data = (
+        filtered_data
+        .sort_values(
+            by=selected_sort,
+            ascending=ascending
+        )
+        .reset_index(drop=True)
+    )
 
 
     # -----------------------------------------------------
@@ -535,7 +670,8 @@ def main():
     # -----------------------------------------------------
 
     st.caption(
-        f"Showing {len(filtered_data)} of {len(player_data)} players"
+        f"Showing {len(filtered_data)} of "
+        f"{len(player_data)} players"
     )
 
 
@@ -543,7 +679,9 @@ def main():
     # Display table
     # -----------------------------------------------------
 
-    styled_data = style_dataframe(filtered_data)
+    styled_data = style_dataframe(
+        filtered_data
+    )
 
     st.markdown(
         TABLE_CSS,
@@ -557,6 +695,10 @@ def main():
         unsafe_allow_html=True
     )
 
+
+# ---------------------------------------------------------
+# Run app
+# ---------------------------------------------------------
 
 if __name__ == "__main__":
     main()
