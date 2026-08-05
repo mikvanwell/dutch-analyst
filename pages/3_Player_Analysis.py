@@ -153,7 +153,11 @@ TABLE_CSS = """
 }
 
 .player-analysis-table table {
-    border-collapse: collapse;
+    /* "separate" (not "collapse") avoids a browser rendering bug where
+       collapsed borders get drawn on top of sticky cells while scrolling,
+       causing scrolled-past columns to visually bleed through. */
+    border-collapse: separate;
+    border-spacing: 0;
     width: 100%;
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
@@ -163,17 +167,28 @@ TABLE_CSS = """
     background-color: var(--secondary-background-color);
     color: var(--text-color);
     font-weight: 700;
-    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-top: 1px solid rgba(128, 128, 128, 0.35);
+    border-bottom: 1px solid rgba(128, 128, 128, 0.35);
+    border-right: 1px solid rgba(128, 128, 128, 0.35);
     padding: 9px 12px;
     text-align: center;
     white-space: nowrap;
 }
 
+.player-analysis-table th:first-child {
+    border-left: 1px solid rgba(128, 128, 128, 0.35);
+}
+
 .player-analysis-table td {
-    border: 1px solid rgba(128, 128, 128, 0.25);
+    border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+    border-right: 1px solid rgba(128, 128, 128, 0.25);
     padding: 8px 12px;
     text-align: center;
     white-space: nowrap;
+}
+
+.player-analysis-table td:first-child {
+    border-left: 1px solid rgba(128, 128, 128, 0.25);
 }
 
 /* Player and team names */
@@ -182,12 +197,15 @@ TABLE_CSS = """
     text-align: left;
 }
 
-/* Sticky player column */
+/* Sticky player column. The box-shadow (rather than relying on the cell
+   border) gives a clean visual edge that sits above scrolled-past columns
+   regardless of border-rendering quirks. */
 .player-analysis-table th:first-child,
 .player-analysis-table td:first-child {
     position: sticky;
     left: 0;
     z-index: 5;
+    box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.35);
 }
 
 /* Keep sticky cell consistent with alternating rows */
